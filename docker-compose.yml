@@ -1,0 +1,39 @@
+---
+version: '3.8'
+services:
+
+   core: &base
+     image: distributed-search:latest-slim3     
+     build:
+       context: .
+       dockerfile: Dockerfile
+     networks:
+     - internal    
+   
+   search:
+     <<: *base     
+     depends_on:
+     - websearch
+     - video
+     - image
+     command: ["./Search", "tcp://*:9555"]
+
+   recursivesearch:
+     <<: *base
+     command: ["./RecursiveSearch", "tcp://*:9996", "tcp://*:9995"]
+
+   websearch:
+     <<: *base
+     command: ["./WebSearch", "tcp://*:9996"]
+
+   video:
+     <<: *base
+     command: ["./VideoSearch", "tcp://*:9995"]
+
+   image:
+     <<: *base
+     command: ["./ImageSearch", "tcp://*:9996"]
+
+networks:
+  internal:
+    driver: bridge    
